@@ -7,7 +7,7 @@ function App() {
 
   return (
     <div>
-      <Bezier></Bezier>
+      <Bezier viewBoxWidth={250} viewBoxHeight={250}></Bezier>
     </div>
   );
 }

@@ -36,38 +36,6 @@ class Bezier extends React.Component {
       const svgRect = this.node.getBoundingClientRect();
       const svgX = clientX - svgRect.left;
       const svgY = clientY - svgRect.top;
-  
-      /*
-  
-      To solve for this, I used cross-multiplication. Here are
-      the variables we need:
-  
-      - svgX            The value we just calculated. The
-                        cursor's `x` position within the SVG.
-  
-      - viewBoxWidth    The width of the SVG's internal
-                        coordinate system. Specified via
-                        props to this component.
-  
-      - svgRect.width   The on-screen width of the DOM element
-                        Returned from `getBoundingClientRect`.
-  
-      Armed with that data, we can cross-multiply as follows:
-  
-           svgX               viewBoxX (unknown)
-      --------------    =    --------------------
-       viewBoxWidth             svgRect.width
-  
-      The left side of this equation is in terms of the screen
-      real-estate: our cursor might be 250px into a 500px-wide
-      svg.
-  
-      The right side is the SVG's viewBox coordinate system.
-      We're `X` pixels into a 250px-wide viewBox.
-  
-      When we re-arrange the formula to solve for `viewBoxX`,
-      we wind up with:
-      */
       const viewBoxX = svgX * viewBoxWidth / svgRect.width;
   
       // We do the same thing for the vertical direction:
@@ -100,22 +68,18 @@ class Bezier extends React.Component {
       return (
         <svg
           ref={node => (this.node = node)}
-          viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}
+          viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`} // controls box area for drawable stuff
           onMouseMove={ev => this.handleMouseMove(ev)}
           onMouseUp={() => this.handleMouseUp()}
           onMouseLeave={() => this.handleMouseUp()}
           style={{
             overflow: 'visible',
-            width: '100%',
+            width: '30%',
             border: '1px solid',
           }}
         >
-          <ConnectingLine
-            from={startPoint}
-            to={controlPoint}
-          />
+          <ConnectingLine from={startPoint} to={controlPoint} />
           <ConnectingLine from={controlPoint} to={endPoint} />
-  
           <Curve instructions={instructions} />
   
           <LargeHandle
@@ -170,8 +134,8 @@ class Bezier extends React.Component {
     <ellipse
       cx={coordinates.x}
       cy={coordinates.y}
-      rx={15}
-      ry={15}
+      rx={10}
+      ry={10}
       fill="rgb(244, 0, 137)"
       onMouseDown={onMouseDown}
       style={{ cursor: '-webkit-grab' }}
@@ -182,8 +146,8 @@ class Bezier extends React.Component {
     <ellipse
       cx={coordinates.x}
       cy={coordinates.y}
-      rx={8}
-      ry={8}
+      rx={10}
+      ry={10}
       fill="transparent"
       stroke="rgb(244, 0, 137)"
       strokeWidth={2}
