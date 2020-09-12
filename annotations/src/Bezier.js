@@ -22,11 +22,14 @@ class Bezier extends React.Component {
     handleMouseUp() {
       this.setState({ draggingPointId: null });
     }
+
+    componentDidUpdate(){
+
+    }
   
     handleMouseMove({ clientX, clientY }) {
       const { viewBoxWidth, viewBoxHeight } = this.props;
       const { draggingPointId } = this.state;
-  
       // If we're not currently dragging a point, this is a no-op. Nothing needs to be done.
       if (!draggingPointId) {
         return;
@@ -36,10 +39,21 @@ class Bezier extends React.Component {
       const svgRect = this.node.getBoundingClientRect();
       const svgX = clientX - svgRect.left;
       const svgY = clientY - svgRect.top;
-      const viewBoxX = svgX * viewBoxWidth / svgRect.width;
-  
-      // We do the same thing for the vertical direction:
-      const viewBoxY = svgY * viewBoxHeight / svgRect.height;
+
+      var viewBoxX = svgX * viewBoxWidth / svgRect.width;
+      var viewBoxY = svgY * viewBoxHeight / svgRect.height;
+
+      if(viewBoxX > 250){
+        viewBoxX = 250;
+      } else if(viewBoxX < 0){
+        viewBoxX = 0;
+      }
+
+      if(viewBoxY > 250){
+        viewBoxY = 250;
+      } else if(viewBoxY < 0){
+        viewBoxY = 0;
+      }
 
       this.setState({
         [draggingPointId]: { x: viewBoxX, y: viewBoxY },
@@ -60,11 +74,6 @@ class Bezier extends React.Component {
           ${endPoint.x},${endPoint.y}
       `;
   
-      // While the Bézier curve is the main attraction,
-      // we also have several shapes, including:
-      //   - the handles for the start/control/end points
-      //   - the dashed line that shows how the control
-      //     point connects to the start/end points.
       return (
         <svg
           ref={node => (this.node = node)}
@@ -117,7 +126,7 @@ class Bezier extends React.Component {
       y2={to.y}
       stroke="rgb(200, 200, 200)"
       strokeDasharray="5,5"
-      strokeWidth={2}
+      strokeWidth={1}
     />
   );
   
@@ -125,8 +134,8 @@ class Bezier extends React.Component {
     <path
       d={instructions}
       fill="none"
-      stroke="rgb(213, 0, 249)"
-      strokeWidth={5}
+      stroke="black"
+      strokeWidth={1}
     />
   );
   
@@ -134,9 +143,9 @@ class Bezier extends React.Component {
     <ellipse
       cx={coordinates.x}
       cy={coordinates.y}
-      rx={10}
-      ry={10}
-      fill="rgb(244, 0, 137)"
+      rx={3}
+      ry={3}
+      fill="green"
       onMouseDown={onMouseDown}
       style={{ cursor: '-webkit-grab' }}
     />
@@ -146,8 +155,8 @@ class Bezier extends React.Component {
     <ellipse
       cx={coordinates.x}
       cy={coordinates.y}
-      rx={10}
-      ry={10}
+      rx={3}
+      ry={3}
       fill="transparent"
       stroke="rgb(244, 0, 137)"
       strokeWidth={2}
