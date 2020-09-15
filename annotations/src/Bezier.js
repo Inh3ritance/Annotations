@@ -22,10 +22,6 @@ class Bezier extends React.Component {
     handleMouseUp() {
       this.setState({ draggingPointId: null });
     }
-
-    componentDidUpdate(){
-
-    }
   
     handleMouseMove({ clientX, clientY }) {
       const { viewBoxWidth, viewBoxHeight } = this.props;
@@ -62,18 +58,7 @@ class Bezier extends React.Component {
   
     render() {
       const { viewBoxWidth, viewBoxHeight } = this.props;
-      const {
-        startPoint,
-        controlPoint,
-        endPoint,
-      } = this.state;
-  
-      const instructions = `
-        M ${startPoint.x},${startPoint.y}
-        Q ${controlPoint.x},${controlPoint.y}
-          ${endPoint.x},${endPoint.y}
-      `;
-  
+
       return (
         <svg
           ref={node => (this.node = node)}
@@ -81,36 +66,9 @@ class Bezier extends React.Component {
           onMouseMove={ev => this.handleMouseMove(ev)}
           onMouseUp={() => this.handleMouseUp()}
           onMouseLeave={() => this.handleMouseUp()}
-          style={{
-            overflow: 'visible',
-            width: '30%',
-            border: '1px solid',
-          }}
+          style={{ overflow: 'visible', width: '33%',border: '2px solid'}}
         >
-          <ConnectingLine from={startPoint} to={controlPoint} />
-          <ConnectingLine from={controlPoint} to={endPoint} />
-          <Curve instructions={instructions} />
-  
-          <LargeHandle
-            coordinates={startPoint}
-            onMouseDown={() =>
-              this.handleMouseDown('startPoint')
-            }
-          />
-  
-          <LargeHandle
-            coordinates={endPoint}
-            onMouseDown={() =>
-              this.handleMouseDown('endPoint')
-            }
-          />
-  
-          <SmallHandle
-            coordinates={controlPoint}
-            onMouseDown={() =>
-              this.handleMouseDown('controlPoint')
-            }
-          />
+        <InstanceHandler startPoint endpoint controlPoint/>
         </svg>
       );
     }
@@ -164,5 +122,50 @@ class Bezier extends React.Component {
       style={{ cursor: '-webkit-grab' }}
     />
   );
+
+  function InstanceHandler() {
+          // here
+          const {
+            startPoint,
+            controlPoint,
+            endPoint,
+          } = this.state;
+      
+          // make function for multiple instructions
+          const instructions = `
+            M ${startPoint.x},${startPoint.y}
+            Q ${controlPoint.x},${controlPoint.y}
+              ${endPoint.x},${endPoint.y}
+          `;
+          // here
+    return (
+      <div>
+          <ConnectingLine from={startPoint} to={controlPoint} />
+          <ConnectingLine from={controlPoint} to={endPoint} />
+          <Curve instructions={instructions} />
+  
+          <LargeHandle
+            coordinates={startPoint}
+            onMouseDown={() =>
+              this.handleMouseDown('startPoint')
+            }
+          />
+  
+          <LargeHandle
+            coordinates={endPoint}
+            onMouseDown={() =>
+              this.handleMouseDown('endPoint')
+            }
+          />
+  
+          <SmallHandle
+            coordinates={controlPoint}
+            onMouseDown={() =>
+              this.handleMouseDown('controlPoint')
+            }
+          />
+      </div>
+    )
+  }
 
   export default Bezier;
