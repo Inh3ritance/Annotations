@@ -1,17 +1,18 @@
 import React from 'react';
+import {ConnectingLine, Curve, LargeHandle, SmallHandle} from './Helper-functions.js';
 
 class Bezier extends React.Component {
     constructor(props) {
       super(props);
   
+      // These are our 3 Bézier points, stored in state.
       this.state = {
-        // These are our 3 Bézier points, stored in state.
         startPoint: { x: 100, y: 10 },
         controlPoint: { x: 190, y: 100 },
         endPoint: { x: 100, y: 190 },
   
         // We keep track of which point is currently being dragged. By default, no point is.
-        draggingPointId: null,
+        draggingPointId: null
       };
     }
   
@@ -27,9 +28,7 @@ class Bezier extends React.Component {
       const { viewBoxWidth, viewBoxHeight } = this.props;
       const { draggingPointId } = this.state;
       // If we're not currently dragging a point, this is a no-op. Nothing needs to be done.
-      if (!draggingPointId) {
-        return;
-      }
+      if (!draggingPointId) return;
 
       // eg. `<svg viewBox="0 0 250 250"
       const svgRect = this.node.getBoundingClientRect();
@@ -57,114 +56,73 @@ class Bezier extends React.Component {
     }
   
     render() {
+      const {
+        startPoint,
+        controlPoint,
+        endPoint
+      } = this.state;
+
       const { viewBoxWidth, viewBoxHeight } = this.props;
 
       return (
         <svg
           ref={node => (this.node = node)}
           viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`} // controls box area for drawable stuff
+          style={{ overflow: 'visible', width: '33%',border: '2px solid'}}
           onMouseMove={ev => this.handleMouseMove(ev)}
           onMouseUp={() => this.handleMouseUp()}
           onMouseLeave={() => this.handleMouseUp()}
-          style={{ overflow: 'visible', width: '33%',border: '2px solid'}}
         >
-        <InstanceHandler startPoint endpoint controlPoint/>
+
+        <InstanceHandler 
+          start = {startPoint} 
+          control = {controlPoint} 
+          end = {endPoint} 
+          onMouseDown={this.handleMouseDown}
+          onMouseMove={ev => this.handleMouseMove(ev)}
+          onMouseUp={() => this.handleMouseUp()}
+          onMouseLeave={() => this.handleMouseUp()}
+        />
+
         </svg>
       );
     }
   }
-  
-  // These helper stateless-functional-components allow us to reuse styles, and give each shape a meaningful name.
-  
-  const ConnectingLine = ({ from, to }) => (
-    <line
-      x1={from.x}
-      y1={from.y}
-      x2={to.x}
-      y2={to.y}
-      stroke="rgb(200, 200, 200)"
-      strokeDasharray="5,5"
-      strokeWidth={1}
-    />
-  );
-  
-  const Curve = ({ instructions }) => (
-    <path
-      d={instructions}
-      fill="none"
-      stroke="black"
-      strokeWidth={1}
-    />
-  );
-  
-  const LargeHandle = ({ coordinates, onMouseDown }) => (
-    <ellipse
-      cx={coordinates.x}
-      cy={coordinates.y}
-      rx={3}
-      ry={3}
-      fill="green"
-      onMouseDown={onMouseDown}
-      style={{ cursor: '-webkit-grab' }}
-    />
-  );
-  
-  const SmallHandle = ({ coordinates, onMouseDown }) => (
-    <ellipse
-      cx={coordinates.x}
-      cy={coordinates.y}
-      rx={3}
-      ry={3}
-      fill="transparent"
-      stroke="rgb(244, 0, 137)"
-      strokeWidth={2}
-      onMouseDown={onMouseDown}
-      style={{ cursor: '-webkit-grab' }}
-    />
-  );
 
-  function InstanceHandler() {
-          // here
-          const {
-            startPoint,
-            controlPoint,
-            endPoint,
-          } = this.state;
-      
-          // make function for multiple instructions
-          const instructions = `
-            M ${startPoint.x},${startPoint.y}
-            Q ${controlPoint.x},${controlPoint.y}
-              ${endPoint.x},${endPoint.y}
-          `;
-          // here
+  const InstanceHandler = ({start, control, end}) => {
+
+    const instructions = `
+      M ${start.x},${start.y}
+      Q ${control.x},${control.y}
+      ${end.x},${end.y} `;
+
     return (
-      <div>
-          <ConnectingLine from={startPoint} to={controlPoint} />
-          <ConnectingLine from={controlPoint} to={endPoint} />
+      <g>
+          <ConnectingLine from={start} to={control} />
+          <ConnectingLine from={control} to={end} />
           <Curve instructions={instructions} />
   
           <LargeHandle
-            coordinates={startPoint}
+            coordinates={start}
             onMouseDown={() =>
               this.handleMouseDown('startPoint')
             }
           />
   
           <LargeHandle
-            coordinates={endPoint}
+            coordinates={end}
             onMouseDown={() =>
               this.handleMouseDown('endPoint')
             }
           />
   
           <SmallHandle
-            coordinates={controlPoint}
+            coordinates={control}
             onMouseDown={() =>
               this.handleMouseDown('controlPoint')
             }
           />
-      </div>
+      </g>
     )
   }
 
