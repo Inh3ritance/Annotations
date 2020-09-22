@@ -4,16 +4,14 @@ import {ConnectingLine, Curve, LargeHandle, SmallHandle} from './Helper-function
 class Bezier extends React.Component {
     constructor(props) {
       super(props);
-  
-      // These are our 3 Bézier points, stored in state.
       this.state = {
-        startPoint: { x: 100, y: 10 },
-        controlPoint: { x: 190, y: 100 },
-        endPoint: { x: 100, y: 190 },
-  
-        // We keep track of which point is currently being dragged. By default, no point is.
+        startPoints: [],
+        controlPoints: [],
+        endPoints: [],
         draggingPointId: null
       };
+      this.createCurve = this.createCurve.bind(this);
+      this.removeCurve = this.removeCurve.bind(this);
     }
   
     handleMouseDown(pointId) {
@@ -27,10 +25,9 @@ class Bezier extends React.Component {
     handleMouseMove({ clientX, clientY }) {
       const { viewBoxWidth, viewBoxHeight } = this.props;
       const { draggingPointId } = this.state;
-      // If we're not currently dragging a point, this is a no-op. Nothing needs to be done.
-      if (!draggingPointId) return;
+      console.log(this.state)
+      if (!draggingPointId) return; // If we're not currently dragging a point, this is a no-op. Nothing needs to be done.
 
-      // eg. `<svg viewBox="0 0 250 250"
       const svgRect = this.node.getBoundingClientRect();
       const svgX = clientX - svgRect.left;
       const svgY = clientY - svgRect.top;
@@ -38,53 +35,87 @@ class Bezier extends React.Component {
       var viewBoxX = svgX * viewBoxWidth / svgRect.width;
       var viewBoxY = svgY * viewBoxHeight / svgRect.height;
 
-      if(viewBoxX > 250){
+      if(viewBoxX > 250)
         viewBoxX = 250;
-      } else if(viewBoxX < 0){
+      else if(viewBoxX < 0)
         viewBoxX = 0;
-      }
 
-      if(viewBoxY > 250){
+      if(viewBoxY > 250)
         viewBoxY = 250;
-      } else if(viewBoxY < 0){
+      else if(viewBoxY < 0)
         viewBoxY = 0;
-      }
 
       this.setState({
-        [draggingPointId]: { x: viewBoxX, y: viewBoxY },
+        [draggingPointId]: [{ x: viewBoxX, y: viewBoxY }]
       });
+      
     }
-  
+
+    createCurve(){
+        this.setState( prevState => ({
+          startPoints: [...prevState.startPoints, {x: 100, y: 10}],
+          controlPoints: [...prevState.controlPoints, {x: 190, y: 100}],
+          endPoints: [...prevState.endPoints, {x: 100, y: 190}]
+        }))
+    }
+
+    removeCurve(){
+
+    }
+
     render() {
+      
       const {
-        startPoint,
-        controlPoint,
-        endPoint
+        startPoints,
+        controlPoints,
+        endPoints
       } = this.state;
 
       const { viewBoxWidth, viewBoxHeight } = this.props;
 
       return (
-        <svg
-          ref={node => (this.node = node)}
-          viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`} // controls box area for drawable stuff
-          style={{ overflow: 'visible', width: '33%',border: '2px solid'}}
-          onMouseMove={ev => this.handleMouseMove(ev)}
-          onMouseUp={() => this.handleMouseUp()}
-          onMouseLeave={() => this.handleMouseUp()}
-        >
+        <div>
+            <svg
+              ref={node => (this.node = node)}
+              viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`} 
+              style={{ overflow: 'visible', width: '33%',border: '2px solid'}}
+              onMouseMove={ev => this.handleMouseMove(ev)}
+              onMouseUp={() => this.handleMouseUp()}
+              onMouseLeave={() => this.handleMouseUp()}
+            >
+{
+              startPoints.map(startPoint => (
+                controlPoints.map(controlPoint => (
+                  endPoints.map(endPoint => (
+              <g>
+              <InstanceHandler 
+                start = {startPoint} 
+                control = {controlPoint} 
+                end = {endPoint} 
+              />
 
-        <InstanceHandler 
-          start = {startPoint} 
-          control = {controlPoint} 
-          end = {endPoint} 
-          onMouseDown={this.handleMouseDown}
-          onMouseMove={ev => this.handleMouseMove(ev)}
-          onMouseUp={() => this.handleMouseUp()}
-          onMouseLeave={() => this.handleMouseUp()}
-        />
-
-        </svg>
+              <LargeHandle
+                coordinates={startPoint}
+                onMouseDown={() =>
+                this.handleMouseDown('startPoints')
+              }/>
+    
+              <LargeHandle
+                coordinates={endPoint}
+                onMouseDown={() =>
+                  this.handleMouseDown('endPoints')
+              }/>
+      
+              <SmallHandle
+                coordinates={controlPoint}
+                onMouseDown={() =>
+                  this.handleMouseDown('controlPoints')
+              }/>
+              </g>
+              ))))))}
+          </svg>
+          <button onClick={this.createCurve}>create</button>
+        </div>
       );
     }
   }
@@ -98,30 +129,9 @@ class Bezier extends React.Component {
 
     return (
       <g>
-          <ConnectingLine from={start} to={control} />
-          <ConnectingLine from={control} to={end} />
-          <Curve instructions={instructions} />
-  
-          <LargeHandle
-            coordinates={start}
-            onMouseDown={() =>
-              this.handleMouseDown('startPoint')
-            }
-          />
-  
-          <LargeHandle
-            coordinates={end}
-            onMouseDown={() =>
-              this.handleMouseDown('endPoint')
-            }
-          />
-  
-          <SmallHandle
-            coordinates={control}
-            onMouseDown={() =>
-              this.handleMouseDown('controlPoint')
-            }
-          />
+        <ConnectingLine from={start} to={control} />
+        <ConnectingLine from={control} to={end} />
+        <Curve instructions={instructions} />
       </g>
     )
   }
