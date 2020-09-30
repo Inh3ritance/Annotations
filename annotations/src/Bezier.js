@@ -59,8 +59,21 @@ class Bezier extends React.Component {
         }))
     }
 
-    removeCurve(){
-
+    removeCurve(event){
+      var cntlpts = [...this.state.controlPoints];
+      var endpts = [...this.state.endPoints];
+      var strtpts = [...this.state.startPoints];
+      var index = 0;
+      if(index !== -1){
+        cntlpts.splice(index,1);
+        endpts.splice(index,1);
+        strtpts.splice(index,1);
+        this.setState({
+          startPoints: strtpts,
+          controlPoints: cntlpts,
+          endPoints: endpts,
+        });
+      }
     }
 
     render() {
@@ -74,7 +87,7 @@ class Bezier extends React.Component {
       const { viewBoxWidth, viewBoxHeight } = this.props;
 
       return (
-        <div>
+        <div onKeyDown={ev => this.removeCurve(ev)}>
             <svg
               ref={node => (this.node = node)}
               viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`} 
