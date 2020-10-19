@@ -8,10 +8,13 @@ class Bezier extends React.Component {
         startPoints: [],
         controlPoints: [],
         endPoints: [],
+        current_curve: null,
         draggingPointId: null
       };
       this.createCurve = this.createCurve.bind(this);
       this.removeCurve = this.removeCurve.bind(this);
+      this.handleClick = this.handleClick.bind(this);
+      this.handleMouseDown = this.handleMouseDown.bind(this)
     }
   
     handleMouseDown(pointId) {
@@ -21,13 +24,24 @@ class Bezier extends React.Component {
     handleMouseUp() {
       this.setState({ draggingPointId: null });
     }
+
+    handleClick(e,index){
+      console.log(index);
+      if(index > -1)
+        this.setState({current_curve: index});
+      else 
+        this.setState({current_curve: null});
+      if (!e) var e = window.event;
+      e.cancelBubble = true;
+      if (e.stopPropagation) e.stopPropagation();
+    }
   
     handleMouseMove({ clientX, clientY }) {
       const { viewBoxWidth, viewBoxHeight } = this.props;
       const { draggingPointId } = this.state;
-      console.log(this.state)
-      if (!draggingPointId) return; // If we're not currently dragging a point, this is a no-op. Nothing needs to be done.
+      const index = this.state.current_curve;
 
+      if (!draggingPointId || index < 0) return;
       const svgRect = this.node.getBoundingClientRect();
       const svgX = clientX - svgRect.left;
       const svgY = clientY - svgRect.top;
@@ -45,18 +59,39 @@ class Bezier extends React.Component {
       else if(viewBoxY < 0)
         viewBoxY = 0;
 
-      this.setState({
-        [draggingPointId]: [{ x: viewBoxX, y: viewBoxY }]
-      });
-      
+      if(draggingPointId === 'startPoints'){
+        let items = [...this.state.startPoints];
+        let item = items[index];
+        item = { x: viewBoxX, y: viewBoxY };
+        console.log(index);
+        items[index] = item;
+        this.setState({startPoints: items});
+      } else if (draggingPointId === 'endPoints') {
+        let items = [...this.state.endPoints];
+        let item = items[index];
+        item = { x: viewBoxX, y: viewBoxY };
+        items[index] = item;
+        this.setState({endPoints: items});
+      } else {
+        let items = [...this.state.controlPoints];
+        let item = items[index];
+        item = { x: viewBoxX, y: viewBoxY };
+        items[index] = item;
+        this.setState({controlPoints: items});
+      }
     }
 
     createCurve(){
-        this.setState( prevState => ({
-          startPoints: [...prevState.startPoints, {x: 100, y: 10}],
-          controlPoints: [...prevState.controlPoints, {x: 190, y: 100}],
-          endPoints: [...prevState.endPoints, {x: 100, y: 190}]
-        }))
+      if(this.state.current_curve === null){
+        this.setState({current_curve: 0});
+      } else {
+        // may need to craete a counter
+      }
+      this.setState( prevState => ({
+        startPoints: [...prevState.startPoints, {x: 100, y: 10}],
+        controlPoints: [...prevState.controlPoints, {x: 190, y: 100}],
+        endPoints: [...prevState.endPoints, {x: 100, y: 190}]
+      }));
     }
 
     removeCurve(event){
@@ -86,46 +121,31 @@ class Bezier extends React.Component {
 
       const { viewBoxWidth, viewBoxHeight } = this.props;
 
+      const inst = [];
+
+      for(const i in startPoints){
+        inst.push(<g onClick={(ev) => this.handleClick(ev,i)} >
+          <InstanceHandler
+                start = {startPoints[i]} 
+                control = {controlPoints[i]} 
+                end = {endPoints[i]} 
+                handleMouseDown = {this.handleMouseDown}
+              />
+        </g>);
+      }
+
       return (
         <div onKeyDown={ev => this.removeCurve(ev)}>
             <svg
               ref={node => (this.node = node)}
               viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`} 
               style={{ overflow: 'visible', width: '33%',border: '2px solid'}}
-              onMouseMove={ev => this.handleMouseMove(ev)}
+              onClick={(ev) => this.handleClick(ev,-1)}
+              onMouseMove={(ev) => this.handleMouseMove(ev)}
               onMouseUp={() => this.handleMouseUp()}
               onMouseLeave={() => this.handleMouseUp()}
             >
-{
-              startPoints.map(startPoint => (
-                controlPoints.map(controlPoint => (
-                  endPoints.map(endPoint => (
-              <g>
-              <InstanceHandler 
-                start = {startPoint} 
-                control = {controlPoint} 
-                end = {endPoint} 
-              />
-
-              <LargeHandle
-                coordinates={startPoint}
-                onMouseDown={() =>
-                this.handleMouseDown('startPoints')
-              }/>
-    
-              <LargeHandle
-                coordinates={endPoint}
-                onMouseDown={() =>
-                  this.handleMouseDown('endPoints')
-              }/>
-      
-              <SmallHandle
-                coordinates={controlPoint}
-                onMouseDown={() =>
-                  this.handleMouseDown('controlPoints')
-              }/>
-              </g>
-              ))))))}
+          { inst }
           </svg>
           <button onClick={this.createCurve}>create</button>
         </div>
@@ -133,7 +153,7 @@ class Bezier extends React.Component {
     }
   }
 
-  const InstanceHandler = ({start, control, end}) => {
+  const InstanceHandler = ({start, control, end, handleMouseDown}) => {
 
     const instructions = `
       M ${start.x},${start.y}
@@ -145,6 +165,23 @@ class Bezier extends React.Component {
         <ConnectingLine from={start} to={control} />
         <ConnectingLine from={control} to={end} />
         <Curve instructions={instructions} />
+        <LargeHandle
+          coordinates={start}
+          onMouseDown={() =>
+          handleMouseDown('startPoints')
+        }/>
+    
+        <LargeHandle
+          coordinates={end}
+          onMouseDown={() =>
+          handleMouseDown('endPoints')
+        }/>
+      
+        <SmallHandle
+          coordinates={control}
+          onMouseDown={() =>
+          handleMouseDown('controlPoints')
+        }/>
       </g>
     )
   }
