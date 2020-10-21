@@ -26,7 +26,6 @@ class Bezier extends React.Component {
     }
 
     handleClick(e,index){
-      console.log(index);
       if(index > -1)
         this.setState({current_curve: index});
       else 
@@ -40,8 +39,7 @@ class Bezier extends React.Component {
       const { viewBoxWidth, viewBoxHeight } = this.props;
       const { draggingPointId } = this.state;
       const index = this.state.current_curve;
-
-      if (!draggingPointId || index < 0) return;
+      if (!draggingPointId || index === null) return;
       const svgRect = this.node.getBoundingClientRect();
       const svgX = clientX - svgRect.left;
       const svgY = clientY - svgRect.top;
@@ -82,6 +80,7 @@ class Bezier extends React.Component {
     }
 
     createCurve(){
+      // need to update
       if(this.state.current_curve === null){
         this.setState({current_curve: 0});
       } else {
@@ -95,10 +94,11 @@ class Bezier extends React.Component {
     }
 
     removeCurve(event){
+      // Need to update
       var cntlpts = [...this.state.controlPoints];
       var endpts = [...this.state.endPoints];
       var strtpts = [...this.state.startPoints];
-      var index = 0;
+      var index = this.state.current_curve;
       if(index !== -1){
         cntlpts.splice(index,1);
         endpts.splice(index,1);
@@ -124,31 +124,31 @@ class Bezier extends React.Component {
       const inst = [];
 
       for(const i in startPoints){
-        inst.push(<g onClick={(ev) => this.handleClick(ev,i)} >
+        inst.push(<g onClick={(ev) => this.handleClick(ev,i)} key = {i}>
           <InstanceHandler
-                start = {startPoints[i]} 
-                control = {controlPoints[i]} 
-                end = {endPoints[i]} 
-                handleMouseDown = {this.handleMouseDown}
-              />
+            start = {startPoints[i]} 
+            control = {controlPoints[i]} 
+            end = {endPoints[i]} 
+            handleMouseDown = {this.handleMouseDown}
+          />
         </g>);
       }
 
       return (
         <div onKeyDown={ev => this.removeCurve(ev)}>
-            <svg
-              ref={node => (this.node = node)}
-              viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`} 
-              style={{ overflow: 'visible', width: '33%',border: '2px solid'}}
-              onClick={(ev) => this.handleClick(ev,-1)}
-              onMouseMove={(ev) => this.handleMouseMove(ev)}
-              onMouseUp={() => this.handleMouseUp()}
-              onMouseLeave={() => this.handleMouseUp()}
-            >
+          <svg
+            ref={node => (this.node = node)}
+            viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`} 
+            style={{ overflow: 'visible', width: '33%',border: '2px solid'}}
+            onClick={(ev) => this.handleClick(ev,-1)}
+            onMouseMove={(ev) => this.handleMouseMove(ev)}
+            onMouseUp={() => this.handleMouseUp()}
+            onMouseLeave={() => this.handleMouseUp()}
+          >
           { inst }
-          </svg>
+        </svg>
           <button onClick={this.createCurve}>create</button>
-        </div>
+      </div>
       );
     }
   }
