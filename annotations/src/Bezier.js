@@ -120,6 +120,7 @@ class Bezier extends React.Component {
             control = {this.state.controlPoints[i]} 
             end = {this.state.endPoints[i]} 
             handleMouseDown = {this.handleMouseDown}
+            show={(this.state.current_curve === i) ? true : false}
           />
         </g>);
       }
