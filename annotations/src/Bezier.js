@@ -14,7 +14,8 @@ class Bezier extends React.Component {
       this.createCurve = this.createCurve.bind(this);
       this.removeCurve = this.removeCurve.bind(this);
       this.handleClick = this.handleClick.bind(this);
-      this.handleMouseDown = this.handleMouseDown.bind(this)
+      this.renderCurves = this.renderCurves.bind(this);
+      this.handleMouseDown = this.handleMouseDown.bind(this);
     }
   
     handleMouseDown(pointId) {
@@ -61,7 +62,6 @@ class Bezier extends React.Component {
         let items = [...this.state.startPoints];
         let item = items[index];
         item = { x: viewBoxX, y: viewBoxY };
-        console.log(index);
         items[index] = item;
         this.setState({startPoints: items});
       } else if (draggingPointId === 'endPoints') {
@@ -111,28 +111,24 @@ class Bezier extends React.Component {
       }
     }
 
-    render() {
-      
-      const {
-        startPoints,
-        controlPoints,
-        endPoints
-      } = this.state;
-
-      const { viewBoxWidth, viewBoxHeight } = this.props;
-
+    renderCurves(){
       const inst = [];
-
-      for(const i in startPoints){
+      for(const i in this.state.startPoints){
         inst.push(<g onClick={(ev) => this.handleClick(ev,i)} key = {i}>
           <InstanceHandler
-            start = {startPoints[i]} 
-            control = {controlPoints[i]} 
-            end = {endPoints[i]} 
+            start = {this.state.startPoints[i]} 
+            control = {this.state.controlPoints[i]} 
+            end = {this.state.endPoints[i]} 
             handleMouseDown = {this.handleMouseDown}
           />
         </g>);
       }
+      return(inst);
+    }
+
+    render() {
+
+      const { viewBoxWidth, viewBoxHeight } = this.props;
 
       return (
         <div onKeyDown={ev => this.removeCurve(ev)}>
@@ -145,7 +141,7 @@ class Bezier extends React.Component {
             onMouseUp={() => this.handleMouseUp()}
             onMouseLeave={() => this.handleMouseUp()}
           >
-          { inst }
+          <this.renderCurves/>
         </svg>
           <button onClick={this.createCurve}>create</button>
       </div>
