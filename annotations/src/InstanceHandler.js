@@ -1,7 +1,7 @@
 import React from 'react';
 import {ConnectingLine, Curve, LargeHandle, SmallHandle} from './Helper-functions.js';
 
-const InstanceHandler = ({start, control, end, handleMouseDown, show}) => {
+const InstanceHandler = ({start, control, end, handleMouseDown, show, index}) => {
 
     const instructions = `
       M ${start.x},${start.y}
@@ -22,7 +22,7 @@ const InstanceHandler = ({start, control, end, handleMouseDown, show}) => {
             <SmallHandle
                 coordinates={control}
                 onMouseDown={() =>
-                handleMouseDown('controlPoints')
+                handleMouseDown('controlPoint '+ index)
             }/>
         ); return(<span></span>)
     }
@@ -34,13 +34,13 @@ const InstanceHandler = ({start, control, end, handleMouseDown, show}) => {
         <LargeHandle
           coordinates={start}
           onMouseDown={() =>
-          handleMouseDown('startPoints')
+          handleMouseDown('startPoint '+ index)
         }/>
     
         <LargeHandle
           coordinates={end}
           onMouseDown={() =>
-          handleMouseDown('endPoints')
+          handleMouseDown('endPoint '+ index)
         }/>
         {showHandle()}
       </g>

@@ -58,19 +58,19 @@ class Bezier extends React.Component {
       else if(viewBoxY < 0)
         viewBoxY = 0;
 
-      if(draggingPointId === 'startPoints'){
+      if(draggingPointId === 'startPoint ' + index){
         let items = [...this.state.startPoints];
         let item = items[index];
         item = { x: viewBoxX, y: viewBoxY };
         items[index] = item;
         this.setState({startPoints: items});
-      } else if (draggingPointId === 'endPoints') {
+      } else if (draggingPointId === 'endPoint ' + index) {
         let items = [...this.state.endPoints];
         let item = items[index];
         item = { x: viewBoxX, y: viewBoxY };
         items[index] = item;
         this.setState({endPoints: items});
-      } else {
+      } else if(draggingPointId === 'controlPoint ' + index){
         let items = [...this.state.controlPoints];
         let item = items[index];
         item = { x: viewBoxX, y: viewBoxY };
@@ -89,17 +89,16 @@ class Bezier extends React.Component {
       this.setState( prevState => ({
         startPoints: [...prevState.startPoints, {x: 100, y: 10}],
         controlPoints: [...prevState.controlPoints, {x: 190, y: 100}],
-        endPoints: [...prevState.endPoints, {x: 100, y: 190}]
+        endPoints: [...prevState.endPoints, {x: 100, y: 190}],
       }));
     }
 
-    removeCurve(event){
-      // Need to update
+    removeCurve(){
       var cntlpts = [...this.state.controlPoints];
       var endpts = [...this.state.endPoints];
       var strtpts = [...this.state.startPoints];
       var index = this.state.current_curve;
-      if(index !== -1){
+      if(index !== null){
         cntlpts.splice(index,1);
         endpts.splice(index,1);
         strtpts.splice(index,1);
@@ -107,6 +106,7 @@ class Bezier extends React.Component {
           startPoints: strtpts,
           controlPoints: cntlpts,
           endPoints: endpts,
+          current_curve: null
         });
       }
     }
@@ -121,6 +121,7 @@ class Bezier extends React.Component {
             end = {this.state.endPoints[i]} 
             handleMouseDown = {this.handleMouseDown}
             show={(this.state.current_curve === i) ? true : false}
+            index={i}
           />
         </g>);
       }
@@ -132,7 +133,7 @@ class Bezier extends React.Component {
       const { viewBoxWidth, viewBoxHeight } = this.props;
 
       return (
-        <div onKeyDown={ev => this.removeCurve(ev)}>
+        <div onKeyDown={this.removeCurve}>
           <svg
             ref={node => (this.node = node)}
             viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`} 
@@ -145,6 +146,7 @@ class Bezier extends React.Component {
           <this.renderCurves/>
         </svg>
           <button onClick={this.createCurve}>create</button>
+          <button onClick={this.removeCurve}>delete</button>
       </div>
       );
     }
