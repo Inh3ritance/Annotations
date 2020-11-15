@@ -13,18 +13,13 @@ const InstanceHandler = ({start, control, end, handleMouseDown, show, index}) =>
             <g>
                 <ConnectingLine from={start} to={control}/>
                 <ConnectingLine from={control} to={end} />
+                <SmallHandle
+                  coordinates={control}
+                  onMouseDown={() =>
+                  handleMouseDown('controlPoint '+ index)
+                }/>
             </g>
         ); return(<span></span>);
-    }
-
-    const showHandle = () => {
-        if(show) return (
-            <SmallHandle
-                coordinates={control}
-                onMouseDown={() =>
-                handleMouseDown('controlPoint '+ index)
-            }/>
-        ); return(<span></span>)
     }
 
     return (
@@ -42,7 +37,6 @@ const InstanceHandler = ({start, control, end, handleMouseDown, show, index}) =>
           onMouseDown={() =>
           handleMouseDown('endPoint '+ index)
         }/>
-        {showHandle()}
       </g>
     )
 }

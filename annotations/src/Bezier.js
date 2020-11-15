@@ -80,13 +80,8 @@ class Bezier extends React.Component {
     }
 
     createCurve(){
-      // need to update
-      if(this.state.current_curve === null){
-        this.setState({current_curve: 0});
-      } else {
-        // may need to craete a counter
-      }
       this.setState( prevState => ({
+        current_curve: this.state.startPoints.length,
         startPoints: [...prevState.startPoints, {x: 100, y: 10}],
         controlPoints: [...prevState.controlPoints, {x: 190, y: 100}],
         endPoints: [...prevState.endPoints, {x: 100, y: 190}],
