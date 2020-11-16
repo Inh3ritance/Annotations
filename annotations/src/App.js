@@ -1,5 +1,5 @@
 import React from 'react';
-import logo from './logo.svg';
+import Canon from './canonball.png';
 import Bezier from './Bezier.js'
 import './App.css';
 
@@ -7,7 +7,7 @@ function App() {
 
   return (
     <div>
-      <Bezier viewBoxWidth={250} viewBoxHeight={250}></Bezier>
+      <Bezier viewBoxWidth={400} viewBoxHeight={400} background={Canon}></Bezier>
     </div>
   );
 }
