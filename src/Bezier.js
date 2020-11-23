@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import InstanceHandler from './InstanceHandler';
 import './Bezier.css';
 
@@ -9,7 +10,7 @@ class Bezier extends React.Component {
             startPoints: [],
             controlPoints: [],
             endPoints: [],
-            current_curve: null,
+            currentCurve: null,
             draggingPointId: null,
         };
         this.createCurve = this.createCurve.bind(this);
@@ -29,11 +30,44 @@ class Bezier extends React.Component {
     }
 
     handleClick(e, index) {
-        if (index > -1) this.setState({ current_curve: index });
-        else this.setState({ current_curve: null });
-        if (!e) var e = window.event;
-        e.cancelBubble = true;
-        if (e.stopPropagation) e.stopPropagation();
+        if (index > -1) {
+            this.setState({ currentCurve: index });
+        } else {
+            this.setState({ currentCurve: null });
+        }
+        const event = !e ? window.event : e;
+        event.cancelBubble = true;
+        if (event.stopPropagation) {
+            event.stopPropagation();
+        }
+    }
+
+    handleMouseMove({ clientX, clientY }) {
+        const { draggingPointId } = this.state;
+        const { currentCurve } = this.state;
+        const [viewBoxX, viewBoxY] = this.getPositions(clientX, clientY);
+        if (draggingPointId === `startPoint ${currentCurve}`) {
+            const { startPoints } = this.state;
+            const items = [...startPoints];
+            let item = items[currentCurve];
+            item = { x: viewBoxX, y: viewBoxY };
+            items[currentCurve] = item;
+            this.setState({ startPoints: items });
+        } else if (draggingPointId === `endPoint ${currentCurve}`) {
+            const { endPoints } = this.state;
+            const items = [...endPoints];
+            let item = items[currentCurve];
+            item = { x: viewBoxX, y: viewBoxY };
+            items[currentCurve] = item;
+            this.setState({ endPoints: items });
+        } else if (draggingPointId === `controlPoint ${currentCurve}`) {
+            const { controlPoints } = this.state;
+            const items = [...controlPoints];
+            let item = items[currentCurve];
+            item = { x: viewBoxX, y: viewBoxY };
+            items[currentCurve] = item;
+            this.setState({ controlPoints: items });
+        }
     }
 
     getPositions(clientX, clientY) {
@@ -41,7 +75,9 @@ class Bezier extends React.Component {
         const svgRect = this.node.getBoundingClientRect();
         const svgX = clientX - svgRect.left;
         const svgY = clientY - svgRect.top;
+        // eslint-disable-next-line no-mixed-operators
         let viewBoxX = svgX * viewBoxWidth / svgRect.width;
+        // eslint-disable-next-line no-mixed-operators
         let viewBoxY = svgY * viewBoxHeight / svgRect.height;
 
         if (viewBoxX > viewBoxWidth) viewBoxX = viewBoxWidth;
@@ -53,36 +89,9 @@ class Bezier extends React.Component {
         return [viewBoxX, viewBoxY];
     }
 
-    handleMouseMove({ clientX, clientY }) {
-        const { draggingPointId } = this.state;
-        const index = this.state.current_curve;
-        const [viewBoxX, viewBoxY] = this.getPositions(clientX, clientY);
-        if (!draggingPointId || index === null) {
-
-        } else if (draggingPointId === `startPoint ${index}`) {
-            const items = [...this.state.startPoints];
-            let item = items[index];
-            item = { x: viewBoxX, y: viewBoxY };
-            items[index] = item;
-            this.setState({ startPoints: items });
-        } else if (draggingPointId === `endPoint ${index}`) {
-            const items = [...this.state.endPoints];
-            let item = items[index];
-            item = { x: viewBoxX, y: viewBoxY };
-            items[index] = item;
-            this.setState({ endPoints: items });
-        } else if (draggingPointId === `controlPoint ${index}`) {
-            const items = [...this.state.controlPoints];
-            let item = items[index];
-            item = { x: viewBoxX, y: viewBoxY };
-            items[index] = item;
-            this.setState({ controlPoints: items });
-        }
-    }
-
     createCurve() {
         this.setState((prevState) => ({
-            current_curve: this.state.startPoints.length,
+            currentCurve: prevState.startPoints.length,
             startPoints: [...prevState.startPoints, { x: 100, y: 10 }],
             controlPoints: [...prevState.controlPoints, { x: 190, y: 100 }],
             endPoints: [...prevState.endPoints, { x: 100, y: 190 }],
@@ -90,34 +99,35 @@ class Bezier extends React.Component {
     }
 
     removeCurve() {
-        const cntlpts = [...this.state.controlPoints];
-        const endpts = [...this.state.endPoints];
-        const strtpts = [...this.state.startPoints];
-        const index = this.state.current_curve;
-        if (index !== null) {
-            cntlpts.splice(index, 1);
-            endpts.splice(index, 1);
-            strtpts.splice(index, 1);
+        const { controlPoints, endPoints, startPoints, currentCurve } = this.state;
+        const cntlpts = [...controlPoints];
+        const endpts = [...endPoints];
+        const strtpts = [...startPoints];
+        if (currentCurve !== null) {
+            cntlpts.splice(currentCurve, 1);
+            endpts.splice(currentCurve, 1);
+            strtpts.splice(currentCurve, 1);
             this.setState({
                 startPoints: strtpts,
                 controlPoints: cntlpts,
                 endPoints: endpts,
-                current_curve: null,
+                currentCurve: null,
             });
         }
     }
 
     renderCurves() {
         const inst = [];
-        for (const i in this.state.startPoints) {
+        const { startPoints, controlPoints, endPoints, currentCurve } = this.state;
+        for (let i = 0; i < startPoints.length; i += 1) {
             inst.push(
                 <g onClick={(ev) => this.handleClick(ev, i)} key={i}>
                     <InstanceHandler
-                        start={this.state.startPoints[i]}
-                        control={this.state.controlPoints[i]}
-                        end={this.state.endPoints[i]}
+                        start={startPoints[i]}
+                        control={controlPoints[i]}
+                        end={endPoints[i]}
                         handleMouseDown={this.handleMouseDown}
-                        show={(this.state.current_curve === i)}
+                        show={(currentCurve === i)}
                         index={i}
                     />
                 </g>);
@@ -130,8 +140,13 @@ class Bezier extends React.Component {
         const { viewBoxWidth, viewBoxHeight, background } = this.props;
 
         return (
-            <div onKeyDown={this.removeCurve}>
+            <div
+                onKeyDown={this.removeCurve}
+                role='button'
+                tabIndex='0'
+            >
                 <svg
+                    /* eslint-disable-next-line no-return-assign */
                     ref={(node) => (this.node = node)}
                     viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}
                     style={{ overflow: 'visible', width: viewBoxWidth, height: viewBoxHeight, border: '1px solid', backgroundImage: `url(${background})`, backgroundSize: `${viewBoxWidth}px ${viewBoxHeight}px` }}
@@ -142,11 +157,27 @@ class Bezier extends React.Component {
                 >
                     <this.renderCurves />
                 </svg>
-                <button onClick={this.createCurve}>create</button>
-                <button onClick={this.removeCurve}>delete</button>
+                <button
+                    onClick={this.createCurve}
+                    type='button'
+                >
+                    create
+                </button>
+                <button
+                    onClick={this.removeCurve}
+                    type='button'
+                >
+                    delete
+                </button>
             </div>
         );
     }
 }
+
+Bezier.propTypes = {
+    viewBoxWidth: PropTypes.number.isRequired,
+    viewBoxHeight: PropTypes.number.isRequired,
+    background: PropTypes.object.isRequired,
+};
 
 export default Bezier;
