@@ -22,7 +22,7 @@ class Bezier extends React.Component {
     }
 
     handleMouseDown(pointId) {
-        this.setState({ draggingPointId: pointId });
+        this.setState({ draggingPointId: pointId }, () => console.log('set mouse down'));
     }
 
     handleMouseUp() {
@@ -140,11 +140,7 @@ class Bezier extends React.Component {
         const { viewBoxWidth, viewBoxHeight, background } = this.props;
 
         return (
-            <div
-                onKeyDown={this.removeCurve}
-                role='button'
-                tabIndex='0'
-            >
+            <div>
                 <svg
                     /* eslint-disable-next-line no-return-assign */
                     ref={(node) => (this.node = node)}

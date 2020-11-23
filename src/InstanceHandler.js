@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { ConnectingLine, Curve, LargeHandle, SmallHandle } from './HelperFunctions';
 
 const InstanceHandler = ({ start, control, end, handleMouseDown, show, index }) => {
@@ -38,6 +39,15 @@ const InstanceHandler = ({ start, control, end, handleMouseDown, show, index }) 
             />
         </g>
     );
+};
+
+InstanceHandler.propTypes = {
+    start: PropTypes.object.isRequired,
+    end: PropTypes.object.isRequired,
+    control: PropTypes.object.isRequired,
+    handleMouseDown: PropTypes.func.isRequired,
+    index: PropTypes.number.isRequired,
+    show: PropTypes.bool.isRequired,
 };
 
 export default InstanceHandler;
