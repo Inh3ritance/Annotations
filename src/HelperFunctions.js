@@ -1,5 +1,6 @@
 // These helper stateless-functional-components allow us to reuse styles, and give each shape a meaningful name.
 import React from 'react';
+import PropTypes from 'prop-types';
 
 export const ConnectingLine = ({ from, to }) => (
     <line
@@ -30,6 +31,7 @@ export const LargeHandle = ({ coordinates, onMouseDown }) => (
         ry={3}
         fill='green'
         onMouseDown={onMouseDown}
+        onClick={onMouseDown}
         style={{ cursor: '-webkit-grab' }}
     />
 );
@@ -44,6 +46,26 @@ export const SmallHandle = ({ coordinates, onMouseDown }) => (
         stroke='rgb(244, 0, 137)'
         strokeWidth={2}
         onMouseDown={onMouseDown}
+        onClick={onMouseDown}
         style={{ cursor: '-webkit-grab' }}
     />
 );
+
+ConnectingLine.propTypes = {
+    from: PropTypes.object.isRequired,
+    to: PropTypes.object.isRequired,
+};
+
+Curve.propTypes = {
+    instructions: PropTypes.string.isRequired,
+};
+
+LargeHandle.propTypes = {
+    coordinates: PropTypes.object.isRequired,
+    onMouseDown: PropTypes.func.isRequired,
+};
+
+SmallHandle.propTypes = {
+    coordinates: PropTypes.object.isRequired,
+    onMouseDown: PropTypes.func.isRequired,
+};
