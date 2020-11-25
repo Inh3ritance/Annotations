@@ -8,6 +8,7 @@ const Bezier = (props) => {
     const [startPoints, setStartPoints] = useState([]);
     const [controlPoints, setControlPoints] = useState([]);
     const [endPoints, setEndPoints] = useState([]);
+    // const [isDraggingPoint, setIsgPoint] = useState(false);
     const [currentCurve, setCurrentCurve] = useState(null);
     const [draggingPointId, setDraggingPointId] = useState(null);
     const [node, setNode] = useState(null);
@@ -22,7 +23,6 @@ const Bezier = (props) => {
     };
 
     const handleClick = (e, index) => {
-        console.log(`clicked on ${index}`);
         const curve = index > -1 ? index : null;
         setCurrentCurve(curve);
     };
@@ -119,11 +119,18 @@ const Bezier = (props) => {
                 ref={(node) => (setNode(node))}
                 viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}
                 style={{ overflow: 'visible', width: viewBoxWidth, height: viewBoxHeight, border: '1px solid', backgroundImage: `url(${background})`, backgroundSize: `${viewBoxWidth}px ${viewBoxHeight}px` }}
-                onClick={(ev) => handleClick(ev, -1)}
                 onMouseMove={(ev) => handleMouseMove(ev)}
                 onMouseUp={() => handleMouseUp()}
                 onMouseLeave={() => handleMouseUp()}
             >
+                <rect
+                    x='0'
+                    y='0'
+                    height={`${viewBoxHeight}`}
+                    width={`${viewBoxWidth}`}
+                    fill='#ffffff00'
+                    onClick={(ev) => handleClick(ev, -1)}
+                />
                 {renderCurves()}
             </svg>
             <button

@@ -31,7 +31,6 @@ export const LargeHandle = ({ coordinates, onMouseDown }) => (
         ry={3}
         fill='green'
         onMouseDown={onMouseDown}
-        onClick={onMouseDown}
         style={{ cursor: '-webkit-grab' }}
     />
 );
@@ -46,7 +45,6 @@ export const SmallHandle = ({ coordinates, onMouseDown }) => (
         stroke='rgb(244, 0, 137)'
         strokeWidth={2}
         onMouseDown={onMouseDown}
-        onClick={onMouseDown}
         style={{ cursor: '-webkit-grab' }}
     />
 );
