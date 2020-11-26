@@ -126,11 +126,10 @@ const Bezier = (props) => {
                 },
             );
             // Center the control point
-            // TODO - Fix non centered control point
             setDrawControl(
                 {
-                    x: viewBoxX / 2.0,
-                    y: viewBoxY / 2.0,
+                    x: (viewBoxX + drawStart.x) / 2.0,
+                    y: (viewBoxY + drawStart.y) / 2.0,
                 },
             );
             setDrawing(true);
@@ -153,8 +152,8 @@ const Bezier = (props) => {
             // Center the control point
             setDrawControl(
                 {
-                    x: viewBoxX / 2.0,
-                    y: viewBoxY / 2.0,
+                    x: (viewBoxX + drawStart.x) / 2.0,
+                    y: (viewBoxY + drawStart.y) / 2.0,
                 },
             );
             // Add new points to sets
