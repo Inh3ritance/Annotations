@@ -5,19 +5,23 @@ import './Bezier.css';
 
 const Bezier = (props) => {
 
+    const [drawing, setDrawing] = useState(false);
     const [startPoints, setStartPoints] = useState([]);
     const [controlPoints, setControlPoints] = useState([]);
     const [endPoints, setEndPoints] = useState([]);
-    // const [isDraggingPoint, setIsgPoint] = useState(false);
     const [currentCurve, setCurrentCurve] = useState(null);
     const [draggingPointId, setDraggingPointId] = useState(null);
     const [node, setNode] = useState(null);
+    const [drawStart, setDrawStart] = useState(null);
+    const [drawControl, setDrawControl] = useState(null);
+    const [drawEnd, setDrawEnd] = useState(null);
     const { viewBoxWidth, viewBoxHeight, background } = props;
 
     const handleMouseDown = (pointId) => {
         setDraggingPointId(pointId);
     };
 
+    // Unselects dragging point
     const handleMouseUp = () => {
         setDraggingPointId(null);
     };
@@ -31,9 +35,7 @@ const Bezier = (props) => {
         const svgRect = node.getBoundingClientRect();
         const svgX = clientX - svgRect.left;
         const svgY = clientY - svgRect.top;
-        // eslint-disable-next-line no-mixed-operators
         let viewBoxX = svgX * viewBoxWidth / svgRect.width;
-        // eslint-disable-next-line no-mixed-operators
         let viewBoxY = svgY * viewBoxHeight / svgRect.height;
 
         if (viewBoxX > viewBoxWidth) viewBoxX = viewBoxWidth;
@@ -93,6 +95,84 @@ const Bezier = (props) => {
         }
     };
 
+    const startDrawing = (ev) => {
+        if (!drawing) {
+            const { clientX, clientY } = ev;
+            handleClick(ev, -1); // Clicked on outside so unselect curve
+            const [viewBoxX, viewBoxY] = getPositions(clientX, clientY);
+            setDrawStart(
+                {
+                    x: viewBoxX,
+                    y: viewBoxY,
+                },
+            );
+        }
+
+    };
+
+    const handleDrawing = ({ clientX, clientY }) => {
+        if (drawStart == null) {
+            // End if no drawing start point
+            return;
+        }
+        const [viewBoxX, viewBoxY] = getPositions(clientX, clientY);
+        if ((viewBoxX !== drawStart.x && viewBoxY !== drawStart.y) || drawing) {
+            // Drawing will start on next move update
+            // Set end point
+            setDrawEnd(
+                {
+                    x: viewBoxX,
+                    y: viewBoxY,
+                },
+            );
+            // Center the control point
+            // TODO - Fix non centered control point
+            setDrawControl(
+                {
+                    x: viewBoxX / 2.0,
+                    y: viewBoxY / 2.0,
+                },
+            );
+            setDrawing(true);
+        }
+
+    };
+
+    const endDrawing = ({ clientX, clientY }) => {
+        // Always unselect dragging point
+        handleMouseUp();
+        const [viewBoxX, viewBoxY] = getPositions(clientX, clientY);
+        if (drawing) {
+            // Set end point
+            setDrawEnd(
+                {
+                    x: viewBoxX,
+                    y: viewBoxY,
+                },
+            );
+            // Center the control point
+            setDrawControl(
+                {
+                    x: viewBoxX / 2.0,
+                    y: viewBoxY / 2.0,
+                },
+            );
+            // Add new points to sets
+            setStartPoints([...startPoints, drawStart]);
+            setControlPoints([...controlPoints, drawControl]);
+            setEndPoints([...endPoints, drawEnd]);
+            // Reset drawing vars
+            setDrawing(false);
+            setDrawEnd(null);
+            setDrawStart(null);
+            setDrawControl(null);
+        } else {
+            // Single click. Didn't drag to draw
+            setDrawStart(null);
+        }
+
+    };
+
     const renderCurves = () => {
         const inst = [];
         for (let i = 0; i < startPoints.length; i += 1) {
@@ -112,15 +192,37 @@ const Bezier = (props) => {
         return (inst);
     };
 
+    // Render the drawing curve when user is dragging to draw
+    const renderDrawCurve = drawing ? (
+        <g>
+            <InstanceHandler
+                start={drawStart}
+                control={drawControl}
+                end={drawEnd}
+                handleMouseDown={handleMouseDown}
+                show
+                index={startPoints.length + 1}
+            />
+        </g>
+    ) : null;
+
     return (
         <div>
             <svg
-                /* eslint-disable-next-line no-return-assign,react/no-this-in-sfc */
                 ref={(node) => (setNode(node))}
                 viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}
-                style={{ overflow: 'visible', width: viewBoxWidth, height: viewBoxHeight, border: '1px solid', backgroundImage: `url(${background})`, backgroundSize: `${viewBoxWidth}px ${viewBoxHeight}px` }}
+                style={
+                    {
+                        overflow: 'visible',
+                        width: viewBoxWidth,
+                        height: viewBoxHeight,
+                        border: '1px solid',
+                        backgroundImage: `url(${background})`,
+                        backgroundSize: `${viewBoxWidth}px ${viewBoxHeight}px`,
+                    }
+                }
                 onMouseMove={(ev) => handleMouseMove(ev)}
-                onMouseUp={() => handleMouseUp()}
+                onMouseUp={(ev) => endDrawing(ev)}
                 onMouseLeave={() => handleMouseUp()}
             >
                 <rect
@@ -129,9 +231,12 @@ const Bezier = (props) => {
                     height={`${viewBoxHeight}`}
                     width={`${viewBoxWidth}`}
                     fill='#ffffff00'
-                    onClick={(ev) => handleClick(ev, -1)}
+                    onMouseDown={(ev) => startDrawing(ev)}
+                    onMouseMove={(ev) => handleDrawing(ev)}
+                    onClick={(ev) => endDrawing(ev)}
                 />
                 {renderCurves()}
+                {renderDrawCurve}
             </svg>
             <button
                 onClick={createCurve}
