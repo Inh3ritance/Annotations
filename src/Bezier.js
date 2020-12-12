@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+/* eslint-disable */
+
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import InstanceHandler from './InstanceHandler';
 import './Bezier.css';
@@ -15,7 +17,13 @@ const Bezier = (props) => {
     const [drawStart, setDrawStart] = useState(null);
     const [drawControl, setDrawControl] = useState(null);
     const [drawEnd, setDrawEnd] = useState(null);
-    const { viewBoxWidth, viewBoxHeight, background } = props;
+    const { viewBoxWidth, viewBoxHeight, background, onStartPoints, onMidPoints, onEndPoints } = props;
+
+    useEffect(() => {
+        onStartPoints(startPoints);
+        onMidPoints(controlPoints);
+        onEndPoints(endPoints);
+    })
 
     const handleMouseDown = (pointId) => {
         setDraggingPointId(pointId);
@@ -260,3 +268,5 @@ Bezier.propTypes = {
 };
 
 export default Bezier;
+
+/* eslint-disable */
